@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.evothings.worksmart" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>WorkSmartApp</name>
+    <description>
+        An application for  Architecting IoT project
+    </description>
+    <author email="dev@cordova.apache.org" href="http://cordova.io">
+        Omar Chacin
+    </author>
+    <content src="http://10.21.24.20:4042"/>
+    <!--<content src="http://192.168.1.153:4042" />-->
+    <access origin="*" />
+    <feature name="Accelerometer">
+        <param name="android-package" value="org.apache.cordova.devicemotion.AccelListener" />
+    </feature>
+</widget>
