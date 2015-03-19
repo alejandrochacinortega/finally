@@ -1,16 +1,26 @@
-<?xml version='1.0' encoding='utf-8'?>
-<widget id="com.evothings.worksmart" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>WorkSmartApp</name>
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns = "http://www.w3.org/ns/widgets"
+        xmlns:gap = "http://phonegap.com/ns/1.0"
+        id        = "com.cordova.oauth2"
+        versionCode = "10" 
+        version   = "1.0.0">
+
+    <name>Oauth2</name>
+
     <description>
-        An application for  Architecting IoT project
+        Oauth2 in Cordova using Phonegap Build
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Omar Chacin
+
+    <author href="http://initlabs.com">
+        Rakshith Krishnappa 
     </author>
-    <content src="http://10.21.24.20:4042"/>
-    <!--<content src="http://192.168.1.153:4042" />-->
+	
     <access origin="*" />
-    <feature name="Accelerometer">
-        <param name="android-package" value="org.apache.cordova.devicemotion.AccelListener" />
-    </feature>
+    
+	<preference name="phonegap-version" value="3.3.0" />
+	
+	<icon src="icon.png" />
+	<gap:splash src="splash.png" />
+
+    <gap:plugin name="org.apache.cordova.inappbrowser" />
 </widget>

@@ -1,305 +1,84 @@
 <!DOCTYPE html>
 <html>
-<head>
+    <head>
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <script type="text/javascript" src="cordova.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <script type="text/javascript" src="js/cordova.oauth2.js"></script>
+        <script type="text/javascript" src="xhr.js"></script>
+        <script src="https://apis.google.com/js/client.js"></script>
+        <script>
+            
+// template for new oauth2 service            
+function oauth2_login() {
+    $.oauth2({
+        auth_url: 'https://accounts.google.com/o/oauth2/auth',           // required
+        response_type: 'code',      // required - "code"/"token"
+        token_url: 'https://accounts.google.com/o/oauth2/token',          // required if response_type = 'code'
+        logout_url: '',         // recommended if available
+        client_id: '435124131375-571j8bianm4e2rlp5ib5qicj3p54l0hm.apps.googleusercontent.com',          // required
+        client_secret: 'ozILwWwXLpmNsgB1yCBiqgPU',      // required if response_type = 'code'
+        redirect_uri: 'http://localhost:63342/oauth2callback',       // required - some dummy url
+        other_params: {
+            'scope': 'https://www.googleapis.com/auth/calendar'
+        }        // optional params object for scope, state, display...
+    }, function(token, response){
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, user-scalable=no
-		initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
-
-    <title>Smartworkspace</title>
-
-    <style>
-        /*@import 'css/evothings-app.css';*/
-        /*button, input, p {
-            margin: 10px 0px 10px 0px;
-        }*/
-    </style>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.7.0/angular-material.min.css">
-    <link rel="stylesheet" href="css/angular-material-icons/angular-material-icons.js">
-    <link rel="stylesheet" href="css/mdi/materialdesignicons.css"/>
-
-
-    <script src="js/jquery.js"></script>
-    <script src="js/evothings.js"></script>
-    <!--<script src="js/app.js"></script>-->
-    <script src="js/index.js"></script>
-    <script src="js/angular/angular.js"></script>
-    <!-- Angular Material Dependencies -->
-    <script src="js/angular-animate/angular-animate.js"></script>
-    <script src="js/angular-aria/angular-aria.js"></script>
-    <script src="js/angular-material/angular-material.js"></script>
+        // do something with token or response
+        apiCall(token);
 
 
-</head>
+        function apiCall(token) {
+            console.log('TOKEN ',token);
+            console.log('inside apiCall');
+            console.log('gapi ', gapi.client)
+            gapi.client.load('calendar','v3',function(){
+                var request = gapi.client.calendar.events.list({
+                    'calendarId': 'testfornith@gmail.com'
+                });
+                request.execute(function(resp) {
+                    console.log('resp ', resp);
+                    console.log('resp ', resp.items);
+                    /*$scope.data = resp.items;*/
+                    /*console.log('vm.data ', vm.data);*/
+                    /*if (resp.items.length == undefined) {
+                     apiCall();
+                     }*/
 
-<body ontouchstart=""><!-- ontouchstart="" enables low-delay CSS transitions. -->
-
-<header>
-    Architeting the IoT
-    <!-- bell -->
-    <!--<button class="back" onclick="history.back()">
-        <img src="img/arrow-left.svg" />
-    </button>
-    <img class="logotype" src="img/logo.svg" alt="Evothings" />-->
-</header>
-
-<div ng-app="App" ng-controller="MainController as vm">
-    <p>Press the button on the Hue Bridge, then select "Auto Connect".</p>
-    <md-button class="md-raised md-primary" ng-click="vm.app.connectAuto()">AUTO CONNECT</md-button>
-    <h2>Manual connect by IP-address</h2>
-
-    <input id="HueBridgeIpAddress" value="192.168.0.x" type="url"/>
-    <br/>
-    <!--<md-button class="md-raised md-primary" onclick="vm.app.connectToIP()">CONNECT</md-button>-->
-
-    <md-button class="md-fab" aria-label="Eat cake">
-        <md-icon class="mdi mdi-calendar"></md-icon>
-    </md-button>
-
-    <p class="lead">Status: <span id="status">Not Connected</span></p>
-
-    <h2>Light</h2>
-
-    <section layout="row"  layout-align="center center">
-        <md-button type="radio" id="lightButton1" name="lightButton" class="md-raised btn-group blue" ng-click="vm.app.selectLight(1)">Living Room</md-button>
-        <md-button type="radio" id="lightButton2" name="lightButton" class="md-raised btn-group blue" ng-click="vm.app.selectLight(2)">Bedroom 1</md-button>
-        <md-button type="radio" id="lightButton3" name="lightButton" class="md-raised btn-group blue" ng-click="vm.app.selectLight(3)">Bedroom 2</md-button>
-    </section>
-
-    <h2>Color</h2>
-    <md-content class="md-padding" ng-show="vm.lightOne.show">
-        <h2>This is Light One</h2>
-        <md-content class="md-padding">
-            <h3>
-                RGB <span ng-attr-style="border: 1px solid #333; background: rgb({{vm.lightOne.color.hue}},{{vm.lightOne.color.bri}},{{vm.lightOne.color.sat}})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            </h3>
-            <h4>{{vm.lightOne.color.hue}}</h4>
-            <h4>{{vm.lightOne.color.bri}}</h4>
-            <h4>{{vm.lightOne.color.sat}}</h4>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Hue</span>
-                </div>
-                <md-slider flex min="0" max="30000" ng-model="vm.lightOne.color.hue" aria-label="red" id="red-slider" class>
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightOne.color.hue" aria-label="red" aria-controls="red-slider">
-                </div>
-            </div>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Brightness</span>
-                </div>
-                <md-slider flex ng-model="vm.lightOne.color.bri" min="0" max="255" aria-label="green" id="green-slider" class="md-accent">
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightOne.color.bri" aria-label="green" aria-controls="green-slider">
-                </div>
-            </div>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Sat</span>
-                </div>
-                <md-slider flex ng-model="vm.lightOne.color.sat" min="0" max="255" aria-label="blue" id="blue-slider" class="md-primary">
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightOne.color.sat" aria-label="blue" aria-controls="blue-slider">
-                </div>
-            </div>
-        </md-content>
-        <md-button type="radio" id="btnColor1" name="btnColor" checked="checked"  class="md-raised" ng-click="vm.app.lightsSetColor1()">Assign</md-button>
-    </md-content>
-
-
-    <md-content class="md-padding" ng-show="vm.lightTwo.show">
-        <h2>This is Light Two</h2>
-        <md-content class="md-padding">
-            <h3>
-                RGB <span ng-attr-style="border: 1px solid #333; background: rgb({{vm.lightTwo.color.hue}},{{vm.lightTwo.color.bri}},{{vm.lightTwo.color.sat}})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            </h3>
-            <h4>{{vm.lightTwo.color.hue}}</h4>
-            <h4>{{vm.lightTwo.color.bri}}</h4>
-            <h4>{{vm.lightTwo.color.sat}}</h4>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Hue</span>
-                </div>
-                <md-slider flex min="0" max="30000" ng-model="vm.lightTwo.color.hue" aria-label="red" id="" class>
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightTwo.color.hue" aria-label="red" aria-controls="red-slider">
-                </div>
-            </div>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Brightness</span>
-                </div>
-                <md-slider flex ng-model="vm.lightTwo.color.bri" min="0" max="255" aria-label="green" id="" class="md-accent">
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightTwo.color.bri" aria-label="green" aria-controls="green-slider">
-                </div>
-            </div>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Sat</span>
-                </div>
-                <md-slider flex ng-model="vm.lightTwo.color.sat" min="0" max="255" aria-label="blue" id="" class="md-primary">
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightTwo.color.sat" aria-label="blue" aria-controls="blue-slider">
-                </div>
-            </div>
-        </md-content>
-        <md-button type="radio" id="btnColor2" name="btnColor" class="md-raised md-primary" ng-click="vm.app.lightsSetColor2()">Assign 2</md-button>
-    </md-content>
-
-    <md-content class="md-padding" ng-show="vm.lightThree.show">
-        <h2>This is Light Three</h2>
-        <md-content class="md-padding">
-            <h3>
-                RGB <span ng-attr-style="border: 1px solid #333; background: rgb({{vm.lightThree.color.hue}},{{vm.lightThree.color.bri}},{{vm.lightThree.color.sat}})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            </h3>
-            <h4>{{vm.lightThree.color.hue}}</h4>
-            <h4>{{vm.lightThree.color.bri}}</h4>
-            <h4>{{vm.lightThree.color.sat}}</h4>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Hue</span>
-                </div>
-                <md-slider flex min="0" max="30000" ng-model="vm.lightThree.color.hue" aria-label="red" id="" class>
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightThree.color.hue" aria-label="red" aria-controls="red-slider">
-                </div>
-            </div>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Brightness</span>
-                </div>
-                <md-slider flex ng-model="vm.lightThree.color.bri" min="0" max="255" aria-label="green" id="" class="md-accent">
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightThree.color.bri" aria-label="green" aria-controls="green-slider">
-                </div>
-            </div>
-            <div layout>
-                <div flex="10" layout layout-align="center center">
-                    <span>Sat</span>
-                </div>
-                <md-slider flex ng-model="vm.lightThree.color.sat" min="0" max="255" aria-label="blue" id="" class="md-primary">
-                </md-slider>
-                <div flex="20" layout layout-align="center center">
-                    <input type="number" ng-model="vm.lightThree.color.sat" aria-label="blue" aria-controls="blue-slider">
-                </div>
-            </div>
-        </md-content>
-        <md-button type="radio" id="btnColor3" name="btnColor" class="md-raised md-primary" ng-click="vm.app.lightsSetColor3()">Assign 3</md-button>
-    </md-content>
+                    /*return $scope.data = resp.items;*/
+                });
+            });
+        }
 
 
 
-    <h2>Effect</h2>
 
-    <section layout="row"  layout-align="center center">
-        <md-button type="radio" id="lightEffect2" name="lightEffect" checked="checked"  class="md-raised" ng-click="vm.app.lightsEffectOff()">Solid Color</md-button>
-        <md-button type="radio" id="lightEffect1" name="lightEffect" class="md-raised md-primary" ng-click="vm.app.lightsEffectOn()">Loop Color</md-button>
-    </section>
-
-    <h2>On or off</h2>
-    <section layout="row" layout-align="center center">
-        <md-button class="md-raised md-primary" ng-click="vm.app.lightOn()">Light On</md-button>
-        <md-button class="md-raised md-warn" ng-click="vm.app.lightOff()">Light Off</md-button>
-    </section>
-
-    <!--<md-content class="md-padding">
-        <h3>
-            RGB <span ng-attr-style="border: 1px solid #333; background: rgb({{vm.color.red}},{{vm.color.green}},{{vm.color.blue}})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </h3>
-        <h4>{{vm.color.red}}</h4>
-        <h4>{{vm.color.green}}</h4>
-        <h4>{{vm.color.blue}}</h4>
-        <div layout>
-            <div flex="10" layout layout-align="center center">
-                <span>First</span>
-            </div>
-            <md-slider flex min="0" max="255" ng-model="vm.color.red" aria-label="red" id="red-slider" class>
-            </md-slider>
-            <div flex="20" layout layout-align="center center">
-                <input type="number" ng-model="vm.color.red" aria-label="red" aria-controls="red-slider">
-            </div>
+        console
+        $("#logs").append("<p class='success'><b>access_token: </b>"+token+"</p>");
+        $("#logs").append("<p class='success'><b>response: </b>"+JSON.stringify(response)+"</p>");
+    }, function(error, response){
+        // do something with error object
+        $("#logs").append("<p class='error'><b>error: </b>"+JSON.stringify(error)+"</p>");
+        $("#logs").append("<p class='error'><b>response: </b>"+JSON.stringify(response)+"</p>");
+    }); 
+}
+       
+        </script>
+        <style>
+            body{background-color:white;font-family: Arial;margin: 0}
+            .content {padding: 0 20px}
+            .button {text-align: center;padding: 10px;border-radius: 10px;border: 1px solid #777;background-color: #ddd}
+            h1 {text-align: center}
+            p.success {background-color: #efe; padding:5px}
+            p.error {background-color: #fee; padding:5px}
+        </style>    
+        <title>Oauth2 Cordova XDK</title>
+    </head>
+    <body>
+        <div class="content">
+            <h1>Oauth2</h1>
+            <p><div class="button" onclick="oauth2_login()">Oauth2 Login</div></p>
+            <div id="logs"></div>
         </div>
-        <div layout>
-            <div flex="10" layout layout-align="center center">
-                <span>Second</span>
-            </div>
-            <md-slider flex ng-model="vm.color.green" min="0" max="255" aria-label="green" id="green-slider" class="md-accent">
-            </md-slider>
-            <div flex="20" layout layout-align="center center">
-                <input type="number" ng-model="vm.color.green" aria-label="green" aria-controls="green-slider">
-            </div>
-        </div>
-        <div layout>
-            <div flex="10" layout layout-align="center center">
-                <span>Third</span>
-            </div>
-            <md-slider flex ng-model="vm.color.blue" min="0" max="255" aria-label="blue" id="blue-slider" class="md-primary">
-            </md-slider>
-            <div flex="20" layout layout-align="center center">
-                <input type="number" ng-model="vm.color.blue" aria-label="blue" aria-controls="blue-slider">
-            </div>
-        </div>
-    </md-content>
--->
-
-
-
-
-
-
-
-
-
-    <!--<h4>{{vm.app.hueColors.hue}}</h4>
-    <h4>{{vm.app.hueColors.bri}}</h4>
-    <h4>{{vm.app.hueColors.sat}}</h4>-->
-    <!--<div layout>
-        <div flex="10" layout layout-align="center center">
-            <span>First</span>
-        </div>
-        <md-slider flex min="0" max="30000" ng-model="vm.app.hueColors.hue" aria-label="red" id="red-slider" class="">
-        </md-slider>
-        <div flex="20" layout layout-align="center center">
-            <input type="number" ng-model="vm.app.hueColors.hue" aria-label="red" aria-controls="red-slider">
-        </div>
-    </div>
-    <div layout>
-        <div flex="10" layout layout-align="center center">
-            <span>Second</span>
-        </div>
-        <md-slider flex ng-model="vm.app.hueColors.bri" min="0" max="255" aria-label="green" id="green-slider" class="md-accent">
-        </md-slider>
-        <div flex="20" layout layout-align="center center">
-            <input type="number" ng-model="vm.app.hueColors.bri" aria-label="green" aria-controls="green-slider">
-        </div>
-    </div>
-    <div layout>
-        <div flex="10" layout layout-align="center center">
-            <span>Third</span>
-        </div>
-        <md-slider flex ng-model="vm.app.hueColors.sat" min="0" max="255" aria-label="blue" id="blue-slider" class="md-primary">
-        </md-slider>
-        <div flex="20" layout layout-align="center center">
-            <input type="number" ng-model="vm.app.hueColors.sat" aria-label="blue" aria-controls="blue-slider">
-        </div>
-    </div>-->
-
-</div>
-
-<script src="js/app.js"></script>
-
-</body>
-
-
-
+    </body>
 </html>

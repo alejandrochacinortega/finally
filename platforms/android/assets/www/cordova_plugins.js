@@ -20,13 +20,22 @@ module.exports = [
         "clobbers": [
             "shake"
         ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.inappbrowser/www/inappbrowser.js",
+        "id": "org.apache.cordova.inappbrowser.inappbrowser",
+        "clobbers": [
+            "cordova.InAppBrowser.open",
+            "window.open"
+        ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
     "org.apache.cordova.device-motion": "0.2.11",
-    "uk.co.ilee.shake": "0.3.0"
+    "uk.co.ilee.shake": "0.3.0",
+    "org.apache.cordova.inappbrowser": "0.6.1-dev"
 }
 // BOTTOM OF METADATA
 });
